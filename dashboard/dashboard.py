@@ -7,9 +7,7 @@ import numpy as np
 st.set_page_config(page_title="Analisis Bike Sharing", layout="wide")
 st.sidebar.title("Navigasi & Filter")
 
-def load_data():
-    return pd.read_csv("main_data.csv", delimiter=";")
-main_data = load_data()
+main_data = pd.read_csv("/mount/src/bike-sharing-dataset-analysis/dashboard/main_data.csv", delimiter=";")
 
 st.sidebar.subheader("Pilih Variabel untuk Analisis")
 corr_variables = st.sidebar.multiselect("Pilih Variabel Korelasi", main_data.select_dtypes(include=[np.number]).columns.tolist(), default=["cnt"])
