@@ -1,7 +1,5 @@
 # Dashboard Analisis Data
 
-Dashboard ini dibuat menggunakan **Streamlit** untuk menampilkan hasil analisis data dengan visualisasi yang interaktif.
-
 ## Setup Environment (Pilih salah satu)
 
 ### 1. Menggunakan Virtual Environment (venv)
@@ -53,19 +51,19 @@ submission
 ## Deploy ke Streamlit Cloud
 Untuk melakukan deploy ke **Streamlit Community Cloud**, ikuti langkah-langkah berikut:
 
-1️⃣ **Upload proyek ke GitHub**
+1. **Upload proyek ke GitHub**
    - Pastikan semua file penting sudah ada di repositori GitHub.
    
-2️⃣ **Login ke [Streamlit Cloud](https://share.streamlit.io)**
+2️. **Login ke [Streamlit Cloud](https://share.streamlit.io)**
    - Sign in menggunakan akun GitHub.
    
-3️⃣ **Deploy aplikasi**
+3️. **Deploy aplikasi**
    - Klik tombol **'New app'** dan pilih repositori yang berisi dashboard-mu.
    - Isi informasi aplikasi:
      - Branch: `main`
      - File utama: `dashboard/dashboard.py`
    - Klik **Deploy**.
 
-4️⃣ **Dapatkan URL dashboard**
+4️. **Dapatkan URL dashboard**
    - Setelah sukses, salin URL aplikasi dan simpan dalam `url.txt`.
 
