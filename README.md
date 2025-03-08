@@ -54,16 +54,16 @@ Untuk melakukan deploy ke **Streamlit Community Cloud**, ikuti langkah-langkah b
 1. **Upload proyek ke GitHub**
    - Pastikan semua file penting sudah ada di repositori GitHub.
    
-2️. **Login ke [Streamlit Cloud](https://share.streamlit.io)**
+2. **Login ke [Streamlit Cloud](https://share.streamlit.io)**
    - Sign in menggunakan akun GitHub.
    
-3️. **Deploy aplikasi**
+3. **Deploy aplikasi**
    - Klik tombol **'New app'** dan pilih repositori yang berisi dashboard-mu.
    - Isi informasi aplikasi:
      - Branch: `main`
      - File utama: `dashboard/dashboard.py`
    - Klik **Deploy**.
 
-4️. **Dapatkan URL dashboard**
+4. **Dapatkan URL dashboard**
    - Setelah sukses, salin URL aplikasi dan simpan dalam `url.txt`.
 
