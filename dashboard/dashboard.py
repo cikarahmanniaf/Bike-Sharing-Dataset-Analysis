@@ -46,6 +46,7 @@ else:
     st.subheader("Statistik Deskriptif")
     st.write(filtered_data.describe())
 
+    st.subheader("Visualisasi 3 Pertanyaan Bisnis")
     st.subheader("Pengaruh Suhu terhadap Peminjaman Sepeda")
     fig, ax = plt.subplots(figsize=(14, 6))
     sns.scatterplot(x="temp", y="casual", data=filtered_data, alpha=0.6, color="teal", label="Kasual")
