@@ -7,7 +7,13 @@ import numpy as np
 st.set_page_config(page_title="Analisis Bike Sharing", layout="wide")
 st.sidebar.title("Navigasi & Filter")
 
-main_data = pd.read_csv("main_data.csv", delimiter=";")
+file_path = "/mount/src/bike-sharing-dataset-analysis/dashboard/main_data.csv"
+
+if os.path.exists(file_path):
+    main_data = pd.read_csv(file_path, delimiter=";")
+else:
+    st.error(f"File {file_path} tidak ditemukan. Harap unggah atau pastikan file tersedia.")
+    st.stop()
 
 st.sidebar.subheader("Pilih Musim dan Cuaca untuk Analisis")
 season_labels = {1: "Spring", 2: "Summer", 3: "Fall", 4: "Winter"}
