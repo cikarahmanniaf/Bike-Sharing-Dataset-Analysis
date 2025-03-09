@@ -7,69 +7,82 @@ import numpy as np
 st.set_page_config(page_title="Analisis Bike Sharing", layout="wide")
 st.sidebar.title("Navigasi & Filter")
 
-main_data = pd.read_csv("/mount/src/bike-sharing-dataset-analysis/dashboard/main_data.csv", delimiter=";")
+main_data = pd.read_csv("main_data.csv", delimiter=";")
 
-st.sidebar.subheader("Pilih Variabel untuk Analisis")
-corr_variables = st.sidebar.multiselect("Pilih Variabel Korelasi", main_data.select_dtypes(include=[np.number]).columns.tolist(), default=["cnt"])
+st.sidebar.subheader("Pilih Musim dan Cuaca untuk Analisis")
+season_labels = {1: "Spring", 2: "Summer", 3: "Fall", 4: "Winter"}
+weather_labels = {1: "Clear", 2: "Mist + Cloudy", 3: "Light Snow/Rain", 4: "Heavy Rain/Snow+Fog"}
 
-bins_slider = st.sidebar.slider("Jumlah Bins Histogram", min_value=5, max_value=50, value=30)
+main_data["season_label"] = main_data["season"].map(season_labels)
+main_data["weather_label"] = main_data["weathersit"].map(weather_labels)
+
+selected_season = st.sidebar.selectbox("Pilih Musim:", ["Semua"] + list(season_labels.values()))
+selected_weather = st.sidebar.selectbox("Pilih Cuaca:", ["Semua"] + list(weather_labels.values()))
+
+filtered_data = main_data.copy()
+if selected_season != "Semua":
+    filtered_data = filtered_data[filtered_data["season_label"] == selected_season]
+if selected_weather != "Semua":
+    filtered_data = filtered_data[filtered_data["weather_label"] == selected_weather]
 
 st.title("Analisis Data Bike Sharing")
 st.markdown("Dashboard ini memberikan wawasan tentang tren penggunaan sepeda berdasarkan dataset Bike Sharing.")
 
-st.subheader("Ringkasan Data")
-col1, col2, col3 = st.columns(3)
-col1.metric("Total Penggunaan Sepeda", main_data["cnt"].sum())
-col2.metric("Rata-rata Penggunaan Harian", round(main_data["cnt"].mean(), 2))
-col3.metric("Hari dengan Pemakaian Maksimum", main_data.loc[main_data['cnt'].idxmax(), 'dteday'])
-
-st.subheader("Tampilan Data")
-num_rows = st.slider("Pilih jumlah baris yang ditampilkan:", min_value=5, max_value=len(main_data), value=10, step=5)
-search_query = st.text_input("Cari dalam dataset:", "")
-selected_day = st.selectbox("Pilih Berdasarkan Hari:", ["Semua"] + sorted(main_data['weekday'].unique().tolist()))
-
-filtered_data = main_data.copy()
-if search_query:
-    filtered_data = filtered_data[filtered_data.astype(str).apply(lambda row: search_query.lower() in row.to_string().lower(), axis=1)]
-if selected_day != "Semua":
-    filtered_data = filtered_data[filtered_data['weekday'] == selected_day]
-
-st.dataframe(filtered_data.head(num_rows))
-
-st.subheader("Statistik Deskriptif")
-st.write(main_data.describe())
-
-st.subheader("Distribusi Data")
-distribution_vars = main_data.select_dtypes(include=[np.number]).columns.tolist()
-selected_variable = st.selectbox("Pilih variabel untuk distribusi:", distribution_vars)
-fig, ax = plt.subplots(figsize=(8, 5))
-sns.histplot(main_data[selected_variable], bins=bins_slider, kde=True, ax=ax, color='skyblue')
-st.pyplot(fig)
-
-st.subheader("Korelasi Antar Variabel")
-numeric_data = main_data.select_dtypes(include=[np.number]).dropna(axis=1, how="all")
-if len(corr_variables) > 1:
-    fig, ax = plt.subplots(figsize=(10, 6))
-    sns.heatmap(numeric_data[corr_variables].corr(), annot=True, cmap="coolwarm", ax=ax)
-    st.pyplot(fig)
+if filtered_data.empty:
+    st.warning(f"Tidak ada data tercatat untuk Musim **{selected_season}** dan Cuaca **{selected_weather}**.")
 else:
-    st.warning("Tidak cukup variabel untuk analisis korelasi.")
+    st.subheader("Ringkasan Data")
+    col1, col2, col3 = st.columns(3)
+    col1.metric("Total Penggunaan Sepeda", filtered_data["cnt"].sum())
+    col2.metric("Rata-rata Penggunaan Harian", round(filtered_data["cnt"].mean(), 2))
+    col3.metric("Hari dengan Pemakaian Maksimum", filtered_data.loc[filtered_data['cnt'].idxmax(), 'dteday'])
 
-st.subheader("Tren Pemakaian Sepeda")
-fig, ax = plt.subplots(figsize=(10, 5))
-sns.lineplot(data=main_data, x=main_data.index, y='cnt', ax=ax, color='green')
-st.pyplot(fig)
+    st.subheader("Tampilan Data")
+    num_rows = st.slider("Pilih jumlah baris yang ditampilkan:", min_value=5, max_value=len(filtered_data), value=10, step=5)
+    search_query = st.text_input("Cari dalam dataset:", "")
+    st.dataframe(filtered_data.head(num_rows))
+    
+    st.subheader("Statistik Deskriptif")
+    st.write(filtered_data.describe())
 
-st.subheader("Pengaruh Cuaca Terhadap Penggunaan Sepeda")
-fig, ax = plt.subplots(figsize=(10, 5))
-sns.boxplot(data=main_data, x='weathersit', y='cnt', ax=ax, palette='coolwarm')
-ax.set_xticklabels(['Clear', 'Mist', 'Light Snow/Rain', 'Heavy Rain/Snow'])
-st.pyplot(fig)
+    st.subheader("Pengaruh Suhu terhadap Peminjaman Sepeda")
+    fig, ax = plt.subplots(figsize=(14, 6))
+    sns.scatterplot(x="temp", y="casual", data=filtered_data, alpha=0.6, color="teal", label="Kasual")
+    sns.scatterplot(x="temp", y="registered", data=filtered_data, alpha=0.6, color="coral", label="Terdaftar")
+    plt.xlabel("Suhu (Normalized)")
+    plt.ylabel("Jumlah Peminjaman")
+    plt.title("Pengaruh Suhu terhadap Peminjaman Sepeda")
+    plt.legend()
+    st.pyplot(fig)
 
-st.subheader("Perbandingan Pengguna Kasual vs Terdaftar")
-fig, ax = plt.subplots(figsize=(10, 5))
-main_data[['casual', 'registered']].sum().plot(kind='bar', ax=ax, color=['blue', 'orange'])
-ax.set_xticklabels(['Casual', 'Registered'], rotation=0)
-st.pyplot(fig)
+    st.subheader("Tren Peminjaman Berdasarkan Musim dan Cuaca")
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
+
+    season_counts = filtered_data.groupby("season_label")["cnt"].mean().reindex(season_labels.values()).tolist()
+    ax1.bar(season_labels.values(), season_counts, color=["#ff9999", "#66b3ff", "#99ff99", "#ffcc99"])
+    ax1.set_title("Rata-rata Peminjaman Sepeda per Musim")
+    ax1.set_ylabel("Rata-rata Jumlah Peminjaman")
+    ax1.grid(axis="y", linestyle="--", alpha=0.7)
+
+    weather_counts = filtered_data.groupby("weather_label")["cnt"].mean().reindex(weather_labels.values(), fill_value=0).tolist()
+    ax2.pie(weather_counts, labels=weather_labels.values(), autopct="%1.1f%%", colors=["#ff9999", "#66b3ff", "#99ff99", "#ffcc99"])
+    ax2.set_title("Distribusi Peminjaman Berdasarkan Kondisi Cuaca")
+
+    plt.tight_layout()
+    st.pyplot(fig)
+
+    st.subheader("Tren Peminjaman Sepeda per Bulan")
+    monthly_trend = filtered_data.groupby(["yr", "mnth"])[["casual", "registered"]].mean().reset_index()
+    monthly_trend["Bulan"] = monthly_trend["yr"].astype(str) + "-" + monthly_trend["mnth"].astype(str)
+    fig, ax = plt.subplots(figsize=(12, 6))
+
+    ax.plot(monthly_trend["Bulan"], monthly_trend["casual"], marker='o', color="#66b3ff", label="Kasual")
+    ax.plot(monthly_trend["Bulan"], monthly_trend["registered"], marker='o', color="#ff9999", label="Terdaftar")
+    ax.set_title("Tren Peminjaman Sepeda per Bulan (Kasual vs Terdaftar)")
+    ax.set_ylabel("Rata-rata Jumlah Peminjaman")
+    ax.grid(axis="y", linestyle="--", alpha=0.7)
+    ax.legend()
+    plt.xticks(rotation=45)
+    st.pyplot(fig)
 
 st.caption('Copyright © cikarahmanniaf')
